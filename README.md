@@ -75,8 +75,6 @@ A Component can be used in any Streamlit app, can pass data between Python and f
 
 ## Examples
 
-See the `template-reactless` directory for a template that does not use [React](https://reactjs.org/).
-
 See the `examples` directory for examples on working with pandas DataFrames, integrating with third-party libraries, and more.
 
 ## Community-provided Templates

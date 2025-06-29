@@ -1,0 +1,16 @@
+[project]
+name = "streamlit-google-picker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "streamlit>=1.46.1",
+]
+
+[dependency-groups]
+dev = [
+    "playwright>=1.53.0",
+    "pytest>=8.4.1",
+    "setuptools>=80.9.0",
+]

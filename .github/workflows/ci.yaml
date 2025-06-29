@@ -47,10 +47,6 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: Check dependencies for examples
-      run: ./dev.py examples-check-deps
-      working-directory: ./component-template/
-
     - name: Check e2e utils files
       run: ./dev.py e2e-utils-check
       working-directory: ./component-template/

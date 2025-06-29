@@ -56,8 +56,6 @@ coverage/
 # Lockfiles
 template/**/yarn.lock
 template/**/package-lock.json
-template-reactless/**/yarn.lock
-template-reactless/**/package-lock.json
 
 ########################################################################
 # JetBrains

@@ -122,9 +122,9 @@ $ ./dev.py e2e-run-tests
 
 # Troubleshooting
 
-## Setting up template and template-reactless locally
+## Setting up template locally
 
-Template and template-reactless share the same component name. We can only have one component installed.
+We can only have one component installed.
 To switch between them, we need to uninstall one and install another. To do that:
 
 ### 1. Check installed template

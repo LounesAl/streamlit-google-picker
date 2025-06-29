@@ -18,10 +18,8 @@ import shutil
 import os
 
 THIS_DIRECTORY = Path(__file__).parent.absolute()
-EXAMPLE_DIRECTORIES = [d for d in (THIS_DIRECTORY / 'examples').iterdir() if d.is_dir()]
 TEMPLATE_DIRECTORIES = [
-    THIS_DIRECTORY / "template",
-    THIS_DIRECTORY / "template-reactless",
+    THIS_DIRECTORY / "google_picker",
 ]
 
 
@@ -38,21 +36,21 @@ def run_verbose(cmd_args, *args, **kwargs):
 # Commands
 def cmd_all_npm_install(args):
     """Install all node dependencies for all examples"""
-    for project_dir in EXAMPLE_DIRECTORIES + TEMPLATE_DIRECTORIES:
+    for project_dir in TEMPLATE_DIRECTORIES:
         frontend_dir = next(project_dir.glob("*/frontend/"))
         run_verbose(["npm", "install"], cwd=str(frontend_dir))
 
 
 def cmd_all_npm_build(args):
     """Build javascript code for all examples and templates"""
-    for project_dir in EXAMPLE_DIRECTORIES + TEMPLATE_DIRECTORIES:
+    for project_dir in TEMPLATE_DIRECTORIES:
         frontend_dir = next(project_dir.glob("*/frontend/"))
         run_verbose(["npm", "run", "build"], cwd=str(frontend_dir))
 
 
 def cmd_e2e_build_images(args):
     """Build docker images for each component e2e tests"""
-    for project_dir in EXAMPLE_DIRECTORIES + TEMPLATE_DIRECTORIES:
+    for project_dir in TEMPLATE_DIRECTORIES:
         e2e_dir = next(project_dir.glob("**/e2e/"), None)
         if e2e_dir and os.listdir(e2e_dir):
             # Define the image tag for the docker image
@@ -90,7 +88,7 @@ def cmd_e2e_build_images(args):
 
 def cmd_e2e_run(args):
     """Run e2e tests for all examples and templates in separate docker images"""
-    for project_dir in EXAMPLE_DIRECTORIES + TEMPLATE_DIRECTORIES:
+    for project_dir in TEMPLATE_DIRECTORIES:
         container_name = project_dir.parts[-1]
         image_tag = (
             f"component-template:py-{args.python_version}-st-{args.streamlit_version}-component-{container_name}"
@@ -113,7 +111,7 @@ def cmd_e2e_run(args):
 
 def cmd_docker_images_cleanup(args):
     """Cleanup docker images and containers"""
-    for project_dir in EXAMPLE_DIRECTORIES + TEMPLATE_DIRECTORIES:
+    for project_dir in TEMPLATE_DIRECTORIES:
         container_name = project_dir.parts[-1]
         image_name = (
             f"component-template:py-{args.python_version}-st-{args.streamlit_version}-component-{container_name}"
@@ -128,7 +126,7 @@ def cmd_all_python_build_package(args):
     """Build wheel packages for all examples and templates"""
     final_dist_directory = (THIS_DIRECTORY / "dist")
     final_dist_directory.mkdir(exist_ok=True)
-    for project_dir in EXAMPLE_DIRECTORIES + TEMPLATE_DIRECTORIES:
+    for project_dir in TEMPLATE_DIRECTORIES:
         run_verbose([sys.executable, "setup.py", "bdist_wheel", "--universal", "sdist"], cwd=str(project_dir))
 
         wheel_file = next(project_dir.glob("dist/*.whl"))
@@ -155,25 +153,6 @@ def check_deps_section(template_package_json, current_package_json, section_name
         if current_version != v:
             errors.append(f'Invalid version of {k!r}. Expected: {v!r}. Current: {current_version!r}')
     return errors
-
-
-def cmd_example_check_deps(args):
-    """Checks that dependencies of examples match the template"""
-    template_deps = json.loads((THIS_DIRECTORY / "template" / "my_component" / "frontend" / "package.json").read_text())
-    examples_package_jsons = sorted(next(d.glob("*/frontend/package.json")) for d in EXAMPLE_DIRECTORIES)
-    exit_code = 0
-    for examples_package_json in examples_package_jsons:
-        example_deps = json.loads(examples_package_json.read_text())
-        errors = check_deps(template_deps, example_deps)
-        if errors:
-            print(f"Found error in {examples_package_json.relative_to(THIS_DIRECTORY)!s}")
-            print("\n".join(errors))
-            print()
-            exit_code = 1
-    if exit_code == 0:
-        print("No errors")
-
-    sys.exit(exit_code)
 
 
 def cmd_check_test_utils(args):
@@ -205,10 +184,6 @@ COOKIECUTTER_VARIANTS = [
     CookiecutterVariant(
         replay_file=THIS_DIRECTORY / ".github" / "replay-files" / "template.json",
         repo_directory=THIS_DIRECTORY / "template",
-    ),
-    CookiecutterVariant(
-        replay_file=THIS_DIRECTORY / ".github" / "replay-files" / "template-reactless.json",
-        repo_directory=THIS_DIRECTORY / "template-reactless",
     ),
 ]
 
@@ -303,9 +278,6 @@ COMMANDS = {
     },
     "all-python-build-package": {
         "fn": cmd_all_python_build_package
-    },
-    "examples-check-deps": {
-        "fn": cmd_example_check_deps
     },
     "templates-check-not-modified": {
         "fn": cmd_check_templates_using_cookiecutter
