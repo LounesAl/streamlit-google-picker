@@ -1,8 +1,3 @@
-import {
-  Streamlit,
-  withStreamlitConnection,
-  ComponentProps,
-} from "streamlit-component-lib"
 import React, {
   useCallback,
   useEffect,
@@ -10,108 +5,126 @@ import React, {
   useState,
   ReactElement,
 } from "react"
+import {
+  Streamlit,
+  withStreamlitConnection,
+  ComponentProps,
+} from "streamlit-component-lib"
 
-/**
- * A template for creating Streamlit components with React
- *
- * This component demonstrates the essential structure and patterns for
- * creating interactive Streamlit components, including:
- * - Accessing props and args sent from Python
- * - Managing component state with React hooks
- * - Communicating back to Streamlit via Streamlit.setComponentValue()
- * - Using the Streamlit theme for styling
- * - Setting frame height for proper rendering
- *
- * @param {ComponentProps} props - The props object passed from Streamlit
- * @param {Object} props.args - Custom arguments passed from the Python side
- * @param {string} props.args.name - Example argument showing how to access Python-defined values
- * @param {boolean} props.disabled - Whether the component is in a disabled state
- * @param {Object} props.theme - Streamlit theme object for consistent styling
- * @returns {ReactElement} The rendered component
- */
-function MyComponent({ args, disabled, theme }: ComponentProps): ReactElement {
-  // Extract custom arguments passed from Python
-  const { name } = args
+declare global {
+  interface Window {
+    gapi: any
+    google: any
+  }
+}
 
-  // Component state
+function GooglePickerComponent({
+  args,
+  disabled,
+  theme,
+}: ComponentProps): ReactElement {
+  const {
+    label = "Choose from Google Drive",
+    apiKey,
+    appId,
+    token,
+    scopes = "https://www.googleapis.com/auth/drive.file",
+  } = args
+
   const [isFocused, setIsFocused] = useState(false)
-  const [numClicks, setNumClicks] = useState(0)
+  const [pickerApiLoaded, setPickerApiLoaded] = useState(false)
 
-  /**
-   * Dynamic styling based on Streamlit theme and component state
-   * This demonstrates how to use the Streamlit theme for consistent styling
-   */
-  const style: React.CSSProperties = useMemo(() => {
-    if (!theme) return {}
-
-    // Use the theme object to style the button border
-    // Access theme properties like primaryColor, backgroundColor, etc.
-    const borderStyling = `1px solid ${isFocused ? theme.primaryColor : "gray"}`
-    return { border: borderStyling, outline: borderStyling }
-  }, [theme, isFocused])
-
-  /**
-   * Tell Streamlit the height of this component
-   * This ensures the component fits properly in the Streamlit app
-   */
+  // Load Google Picker API
   useEffect(() => {
-    // Call this when the component's size might change
-    Streamlit.setFrameHeight()
-    // Adding the style and theme as dependencies since they might
-    // affect the visual size of the component.
-  }, [style, theme])
-
-  /**
-   * Click handler for the button
-   * Demonstrates how to update component state and send data back to Streamlit
-   */
-  const onClicked = useCallback((): void => {
-    const newNumClicks = numClicks + 1
-    // Update local state
-    setNumClicks(newNumClicks)
-    // Send value back to Streamlit (will be available in Python)
-    Streamlit.setComponentValue(newNumClicks)
-  }, [numClicks])
-
-  /**
-   * Focus handler for the button
-   * Updates visual state when the button receives focus
-   */
-  const onFocus = useCallback((): void => {
-    setIsFocused(true)
+    if (!window.gapi) {
+      const script = document.createElement("script")
+      script.src = "https://apis.google.com/js/api.js"
+      script.async = true
+      script.onload = () => {
+        window.gapi.load("client:picker", () => setPickerApiLoaded(true))
+      }
+      document.body.appendChild(script)
+    } else {
+      window.gapi.load("client:picker", () => setPickerApiLoaded(true))
+    }
   }, [])
 
-  /**
-   * Blur handler for the button
-   * Updates visual state when the button loses focus
-   */
-  const onBlur = useCallback((): void => {
-    setIsFocused(false)
-  }, [])
+  const [pickerOpen, setPickerOpen] = useState(false)
+
+  useEffect(() => {
+    Streamlit.setFrameHeight(pickerOpen ? 600 : 80)
+  }, [pickerOpen])
+
+  const style: React.CSSProperties = useMemo(() => {
+    const primaryColor = theme?.primaryColor ?? "#f63366"
+    return {
+      border: `1.5px solid ${isFocused ? primaryColor : "#ccc"}`,
+      background: isFocused ? primaryColor : "#fff",
+      color: isFocused ? "#fff" : "#262730",
+      fontWeight: 600,
+      fontSize: 16,
+      padding: "0.5em 1em",
+      borderRadius: "0.25rem",
+      marginTop: 8,
+      width: "100%",
+      cursor: disabled ? "not-allowed" : "pointer",
+      opacity: disabled ? 0.6 : 1,
+      transition: "background 0.2s, color 0.2s, border 0.2s",
+      textAlign: "left" as const,
+    }
+  }, [theme, isFocused, disabled])
+
+  const onFocus = useCallback(() => setIsFocused(true), [])
+  const onBlur = useCallback(() => setIsFocused(false), [])
+
+  const showPicker = useCallback(() => {
+    setPickerOpen(true)
+    if (!window.google?.picker) {
+      alert("Google Picker not loaded yet!")
+      return
+    }
+    if (!token) {
+      alert("No Google OAuth token provided!")
+      return
+    }
+    const view = new window.google.picker.DocsView(window.google.picker.ViewId.DOCS)
+      .setIncludeFolders(true)
+      .setSelectFolderEnabled(true)
+
+    const picker = new window.google.picker.PickerBuilder()
+      .addView(view)
+      .setOAuthToken(token)
+      .setDeveloperKey(apiKey)
+      .setAppId(appId)
+      .setCallback((data: any) => {
+        if (data.action === window.google.picker.Action.CANCEL) {
+          setPickerOpen(false)
+        }
+        if (data.action === window.google.picker.Action.PICKED) {
+          Streamlit.setComponentValue(data.docs)
+        }
+      })
+      .build()
+
+    picker.setVisible(true)
+  }, [token, apiKey, appId])
 
   return (
-    <span>
-      Hello, {name}! &nbsp;
+    <div>
+      <label style={{ fontWeight: 500, fontSize: 14, marginBottom: 6 }}>
+        {label}
+      </label>
       <button
         style={style}
-        onClick={onClicked}
-        disabled={disabled}
+        onClick={showPicker}
+        disabled={disabled || !pickerApiLoaded || !token}
         onFocus={onFocus}
         onBlur={onBlur}
       >
-        Click Me!
+        📁 {label}
       </button>
-    </span>
+    </div>
   )
 }
 
-/**
- * withStreamlitConnection is a higher-order component (HOC) that:
- * 1. Establishes communication between this component and Streamlit
- * 2. Passes Streamlit's theme settings to your component
- * 3. Handles passing arguments from Python to your component
- * 4. Handles component re-renders when Python args change
- *
- * You don't need to modify this wrapper unless you need custom connection behavior.
- */
-export default withStreamlitConnection(MyComponent)
+export default withStreamlitConnection(GooglePickerComponent)

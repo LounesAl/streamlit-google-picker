@@ -16,10 +16,10 @@ A Component can be used in any Streamlit app, can pass data between Python and f
   import streamlit.components.v1 as components
 
   # Declare the component:
-  my_component = components.declare_component("my_component", path="frontend/build")
+  google_picker = components.declare_component("google_picker", path="frontend/build")
 
   # Use it:
-  my_component(greeting="Hello", name="World")
+  google_picker(greeting="Hello", name="World")
   ```
 
 - Build the component's frontend out of HTML and JavaScript (or TypeScript, or ClojureScript, or whatever you fancy). React is supported, but not required:
@@ -57,7 +57,7 @@ A Component can be used in any Streamlit app, can pass data between Python and f
   ```
 - Initialize and run the component template frontend:
   ```bash
-  $ cd template/my_component/frontend
+  $ cd template/google_picker/frontend
   $ npm install    # Install npm dependencies
   $ npm run start  # Start the Vite dev server
   ```
@@ -66,17 +66,16 @@ A Component can be used in any Streamlit app, can pass data between Python and f
   $ cd template
   $ . venv/bin/activate  # activate the venv you created earlier
   $ pip install -e . # install template as editable package
-  $ streamlit run my_component/example.py  # run the example
+  $ streamlit run google_picker/example.py  # run the example
   ```
 - If all goes well, you should see something like this:
   ![Quickstart Success](quickstart.png)
-- Modify the frontend code at `my_component/frontend/src/MyComponent.tsx`.
-- Modify the Python code at `my_component/__init__.py`.
+- Modify the frontend code at `google_picker/frontend/src/MyComponent.tsx`.
+- Modify the Python code at `google_picker/__init__.py`.
 
 ## Examples
 
 See the `examples` directory for examples on working with pandas DataFrames, integrating with third-party libraries, and more.
-
 ## Community-provided Templates
 
 These templates are provided by the community. If you run into any issues, please file your issues against their repositories.

@@ -13,9 +13,9 @@ pip install streamlit-custom-component
 ```python
 import streamlit as st
 
-from my_component import my_component
+from google_picker import google_picker
 
-value = my_component()
+value = google_picker()
 
 st.write(value)
 ```

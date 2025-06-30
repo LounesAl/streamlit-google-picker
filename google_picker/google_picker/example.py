@@ -1,28 +1,81 @@
 import streamlit as st
-from google_picker import my_component
+from streamlit_oauth import OAuth2Component
+import os
+import base64
+import json
 
-# Add some test code to play with the component while it's in development.
-# During development, we can run this just as we would any other Streamlit
-# app: `$ streamlit run my_component/example.py`
+from google_picker import google_picker
 
-st.subheader("Component with constant args")
+from dotenv import load_dotenv
+load_dotenv()
 
-# Create an instance of our component with a constant `name` arg, and
-# print its output value.
-num_clicks = my_component("World")
-st.markdown("You've clicked %s times!" % int(num_clicks))
+# maintenant tu peux lire tes clés comme avant
+CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
+API_KEY = os.environ.get("GOOGLE_API_KEY")
+APP_ID = os.environ.get("GOOGLE_PROJECT_NUMBER")
 
-st.markdown("---")
-st.subheader("Component with variable args")
+st.title("Google Picker OAuth2 Example")
 
-# Create a second instance of our component whose `name` arg will vary
-# based on a text_input widget.
-#
-# We use the special "key" argument to assign a fixed identity to this
-# component instance. By default, when a component's arguments change,
-# it is considered a new instance and will be re-mounted on the frontend
-# and lose its current state. In this case, we want to vary the component's
-# "name" argument without having it get recreated.
-name_input = st.text_input("Enter a name", value="Streamlit")
-num_clicks = my_component(name_input, key="foo")
-st.markdown("You've clicked %s times!" % int(num_clicks))
+# Endpoints Google OAuth2
+AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
+TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
+REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
+
+# Scope Google Drive (ajuste si besoin !)
+SCOPES = "openid email profile https://www.googleapis.com/auth/drive.file"
+
+def parse_email_from_id_token(id_token):
+    """Décode le JWT pour récupérer l'email utilisateur."""
+    payload = id_token.split(".")[1]
+    payload += "=" * (-len(payload) % 4)
+    return json.loads(base64.b64decode(payload))["email"]
+
+if "auth" not in st.session_state or "token" not in st.session_state:
+    # OAuth2 flow (login Google)
+    oauth2 = OAuth2Component(
+        CLIENT_ID,
+        CLIENT_SECRET,
+        AUTHORIZE_ENDPOINT,
+        TOKEN_ENDPOINT,
+        TOKEN_ENDPOINT,
+        REVOKE_ENDPOINT,
+    )
+    result = oauth2.authorize_button(
+        name="Continue with Google",
+        icon="https://www.google.com.tw/favicon.ico",
+        redirect_uri="http://localhost:8501",
+        scope=SCOPES,
+        key="google",
+        extras_params={"prompt": "consent", "access_type": "offline"},
+        use_container_width=True,
+        pkce='S256',
+    )
+    if result:
+        # Stockage du token et email dans la session
+        id_token = result["token"]["id_token"]
+        st.session_state["auth"] = parse_email_from_id_token(id_token)
+        st.session_state["token"] = result["token"]
+        st.success(f"Connecté comme {st.session_state['auth']}")
+        st.rerun()
+    st.stop()
+
+# ==== Utilisateur authentifié ====
+st.success(f"Connecté comme {st.session_state['auth']}")
+token = st.session_state["token"]["access_token"]
+
+# ==== Google Picker Component ====
+result = google_picker(
+    label="Pick your file from Google Drive",
+    token=token,
+    apiKey=API_KEY,
+    appId=APP_ID,
+    # scopes=SCOPES,  # Tu peux passer scopes si tu veux customiser côté JS
+)
+st.write("Result from Picker:", result)
+
+# Option logout
+if st.button("Logout"):
+    del st.session_state["auth"]
+    del st.session_state["token"]
+    st.rerun()

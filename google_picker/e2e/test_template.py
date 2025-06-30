@@ -7,7 +7,7 @@ from playwright.sync_api import Page, expect
 from e2e_utils import StreamlitRunner
 
 ROOT_DIRECTORY = Path(__file__).parent.parent.absolute()
-BASIC_EXAMPLE_FILE = ROOT_DIRECTORY / "my_component" / "example.py"
+BASIC_EXAMPLE_FILE = ROOT_DIRECTORY / "google_picker" / "example.py"
 
 @pytest.fixture(autouse=True, scope="module")
 def streamlit_app():
@@ -24,10 +24,10 @@ def go_to_app(page: Page, streamlit_app: StreamlitRunner):
 
 def test_should_render_template(page: Page):
     frame_0 = page.frame_locator(
-        'iframe[title="my_component\\.my_component"]'
+        'iframe[title="google_picker\\.google_picker"]'
     ).nth(0)
     frame_1 = page.frame_locator(
-        'iframe[title="my_component\\.my_component"]'
+        'iframe[title="google_picker\\.google_picker"]'
     ).nth(1)
 
     st_markdown_0 = page.get_by_role('paragraph').nth(0)
@@ -59,11 +59,11 @@ def test_should_render_template(page: Page):
 
 
 def test_should_change_iframe_height(page: Page):
-    frame = page.frame_locator('iframe[title="my_component\\.my_component"]').nth(1)
+    frame = page.frame_locator('iframe[title="google_picker\\.google_picker"]').nth(1)
 
     expect(frame.get_by_text("Hello, Streamlit!")).to_be_visible()
 
-    locator = page.locator('iframe[title="my_component\\.my_component"]').nth(1)
+    locator = page.locator('iframe[title="google_picker\\.google_picker"]').nth(1)
 
     page.wait_for_timeout(1000)
     init_frame_height = locator.bounding_box()['height']
