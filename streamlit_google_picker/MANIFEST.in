@@ -1,1 +1,1 @@
-recursive-include google_picker/frontend/build *
+recursive-include streamlit_google_picker/frontend/build *
