@@ -4,7 +4,7 @@ import os
 import base64
 import json
 
-from google_picker import google_picker
+from streamlit_google_picker import google_picker
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -29,7 +29,7 @@ st.set_page_config(
 )
 
 def st_normal():
-    _, col, _ = st.columns([1, 2, 1])
+    _, col, _ = st.columns([2, 6, 2])
     return col
 
 with st_normal():
@@ -81,7 +81,7 @@ with st_normal():
         accept_multiple_files=True,                   # Enable multi-select (like st.file_uploader)
         type=["pdf", "png"],                          # Restrict to pdf, png
         allow_folders=True,                           # Allow folder selection
-        view_ids=["DOCS", "SPREADSHEETS", "FOLDERS"], # Tabs: Docs, Spreadsheets, Folders (custom views)
+        view_ids=None, # Tabs: Docs, Spreadsheets, Folders (custom views)
         nav_hidden=False,                             # Show navigation pane
         key="google_picker"
     )

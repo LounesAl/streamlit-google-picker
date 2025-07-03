@@ -1,96 +1,147 @@
-# Streamlit Component Templates
+# streamlit-google-picker
 
-This repo contains templates and example code for creating [Streamlit](https://streamlit.io) Components.
+**A Streamlit component to select files and folders from Google Drive with the official Google Picker.**
 
-For complete information, please see the [Streamlit Components documentation](https://docs.streamlit.io/en/latest/streamlit_components.html)!
+This component lets you embed the Google Drive file picker directly in your Streamlit app. Your users can pick files (e.g. PDFs, images, etc.) or folders from their Google Drive, after authenticating with Google.
 
-## Overview
+---
 
-A Streamlit Component is made out of a Python API and a frontend (built using any web tech you prefer).
+## 🚀 Features
 
-A Component can be used in any Streamlit app, can pass data between Python and frontend code, and can optionally be distributed on [PyPI](https://pypi.org/) for the rest of the world to use.
+✅ Pick files or folders from Google Drive
+✅ Support for multi-select
+✅ Restrict to specific MIME types (e.g. PDF, PNG)
+✅ Seamless integration with Streamlit apps
+✅ Works alongside local `st.file_uploader`
 
-- Create a component's API in a single line of Python:
+---
 
-  ```python
-  import streamlit.components.v1 as components
+## 📸 Demo
 
-  # Declare the component:
-  google_picker = components.declare_component("google_picker", path="frontend/build")
+> Example picker button:
 
-  # Use it:
-  google_picker(greeting="Hello", name="World")
-  ```
+<p align="center">
+  <img src="./file_loader.png" width="500"/>
+</p>
 
-- Build the component's frontend out of HTML and JavaScript (or TypeScript, or ClojureScript, or whatever you fancy). React is supported, but not required:
+---
 
-  ```tsx
-  import React from 'react';
-  import {
-    withStreamlitConnection,
-    ComponentProps,
-  } from 'streamlit-component-lib';
+## 🛠️ Installation
 
-  function MyComponent({ args }: ComponentProps) {
-    // Access arguments from Python via `props.args`:
-    const { greeting, name } = args;
-    return (
-      <div>
-        {greeting}, {name}!
-      </div>
-    );
-  }
+```bash
+pip install streamlit-google-picker
+```
 
-  export default withStreamlitConnection(MyComponent);
-  ```
+*(Replace with your PyPI name if you publish it there. Otherwise explain how to install it from GitHub.)*
 
-## Quickstart
+---
 
-- Ensure you have [Python 3.9+](https://www.python.org/downloads/), [Node.js](https://nodejs.org), and [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) installed.
-- Clone this repo.
-- Create a new Python virtual environment for the template:
-  ```bash
-  $ cd template
-  $ python3 -m venv venv  # create venv
-  $ . venv/bin/activate   # activate venv
-  $ pip install streamlit # install streamlit
-  ```
-- Initialize and run the component template frontend:
-  ```bash
-  $ cd template/google_picker/frontend
-  $ npm install    # Install npm dependencies
-  $ npm run start  # Start the Vite dev server
-  ```
-- From a separate terminal, run the template's Streamlit app:
-  ```bash
-  $ cd template
-  $ . venv/bin/activate  # activate the venv you created earlier
-  $ pip install -e . # install template as editable package
-  $ streamlit run google_picker/example.py  # run the example
-  ```
-- If all goes well, you should see something like this:
-  ![Quickstart Success](quickstart.png)
-- Modify the frontend code at `google_picker/frontend/src/MyComponent.tsx`.
-- Modify the Python code at `google_picker/__init__.py`.
+## ⚙️ Requirements
 
-## Examples
+You need to set up a Google Cloud project and OAuth2 credentials:
 
-See the `examples` directory for examples on working with pandas DataFrames, integrating with third-party libraries, and more.
-## Community-provided Templates
+1️⃣ Create OAuth2 client ID (Web application)
+2️⃣ Set authorized redirect URI to your Streamlit app URL (e.g. `http://localhost:8501` for local)
+3️⃣ Enable **Google Drive API** and **Google Picker API**
+4️⃣ Get:
 
-These templates are provided by the community. If you run into any issues, please file your issues against their repositories.
+* **Client ID**
+* **Client Secret**
+* **API Key**
+* **Project number (App ID)**
 
-- [streamlit-component-svelte-template](https://github.com/93degree/streamlit-component-svelte-template) - [@93degree](https://github.com/93degree)
-- [streamlit-component-vue-vite-template](https://github.com/gabrieltempass/streamlit-component-vue-vite-template) - [@gabrieltempass](https://github.com/gabrieltempass)
-- [streamlit-component-template-vue](https://github.com/andfanilo/streamlit-component-template-vue) - [@andfanilo](https://github.com/andfanilo)
-- [streamlit-component-template-react-hooks](https://github.com/whitphx/streamlit-component-template-react-hooks) - [@whitphx](https://github.com/whitphx)
+Store these in your environment variables:
 
-## Contributing
+```
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+API_KEY=your-api-key
+GOOGLE_PROJECT_NUMBER=your-project-number
+```
 
-If you want to contribute to this project, `./dev.py` script will be helpful for you. For details, run `./dev.py --help`.
+---
 
-## More Information
+## ✨ Usage
 
-- [Streamlit Components documentation](https://docs.streamlit.io/library/components)
-- [Streamlit Forums](https://discuss.streamlit.io/tag/custom-components)
-- [Streamlit Components gallery](https://www.streamlit.io/components)
+Below is a minimal example of how to use the **Google Picker component** in your Streamlit app **after you have already done OAuth2 login** and have an access token.
+
+> **Important:** This snippet assumes you already got `access_token` from your OAuth2 flow.
+
+```python
+import streamlit as st
+from streamlit_google_picker import google_picker
+
+# Example token you got from OAuth2 flow
+token = "YOUR_ACCESS_TOKEN"
+
+API_KEY = "YOUR_GOOGLE_API_KEY"
+APP_ID = "YOUR_GOOGLE_PROJECT_NUMBER"
+
+result = google_picker(
+    label="Pick files from Google Drive",
+    token=token,
+    apiKey=API_KEY,
+    appId=APP_ID,
+    accept_multiple_files=True,       # Allow selecting multiple files
+    type=["pdf", "png"],              # Restrict file types
+    allow_folders=True,               # Allow folder selection
+    nav_hidden=False,                 # Show navigation pane
+    key="google_picker",
+)
+
+if result:
+    st.write("Picker Result:", result)
+```
+
+---
+
+## 📥 Result format
+
+When the user picks files or folders, you get a JSON-like result:
+
+```json
+[
+  {
+    "name": "MyFile.pdf",
+    "mimeType": "application/pdf",
+    "id": "file_id",
+    "url": "https://drive.google.com/file/d/..."
+  },
+  ...
+]
+```
+
+You can use this info to download files via the Google Drive API.
+
+---
+
+## 🧩 Example full app
+
+If you want OAuth2 login + Picker in Streamlit, your app would:
+
+✅ Show "Sign in with Google" (OAuth2 flow)
+✅ Get and store `access_token` in `st.session_state`
+✅ Call `google_picker()` with that token
+
+Your repo already has an example (`app.py` or similar) showing the full flow.
+
+---
+
+## 🧑‍💻 Development
+
+* Clone this repo
+* Install requirements
+* Develop your Streamlit component (frontend in React, backend in Python)
+
+---
+
+## 📜 License
+
+MIT
+
+---
+
+## 💡 Acknowledgments
+
+* [Streamlit Components](https://docs.streamlit.io/library/components)
+* [Google Picker API Docs](https://developers.google.com/picker/docs)

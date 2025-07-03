@@ -1,6 +1,6 @@
 import React, { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
-import MyComponent from "./MyComponent"
+import MyComponent from "./google_picker"
 
 const rootElement = document.getElementById("root")
 
