@@ -73,7 +73,7 @@ with st_normal():
     token = st.session_state["token"]["access_token"]
 
     # ==== Google Picker Component ====
-    result = google_picker(
+    grive_uploaded_files = google_picker(
         label="Pick files from Google Drive",
         token=token,
         apiKey=API_KEY,
@@ -85,8 +85,15 @@ with st_normal():
         nav_hidden=False,                             # Show navigation pane
         key="google_picker"
     )
-    if result:
-        st.write("Result from Picker:", result)
+    for f in grive_uploaded_files:
+        st.write(f"Filename: {f.name}, Size: {f.size_bytes}")
+        data = f.read()
+        st.write(len(data))
+        # Save to local disk
+        with open(f.name, "wb") as out_file:
+            out_file.write(data)
+        st.success(f"Saved file: {f.name}")
+        
         
     uploaded_files = st.file_uploader(
         "Choose from Local Storage", 

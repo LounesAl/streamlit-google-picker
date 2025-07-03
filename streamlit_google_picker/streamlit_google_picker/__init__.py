@@ -3,6 +3,8 @@ from typing import Sequence, Optional, Union
 
 import streamlit.components.v1 as components
 
+from .uploaded_file import GooglePickerResult
+
 _RELEASE = True
 
 if not _RELEASE:
@@ -65,4 +67,7 @@ def google_picker(
         key=key,
         default=None,
     )
-    return component_value
+    if not component_value:
+        return []
+    # For multi-select or single, always return GooglePickerResult
+    return GooglePickerResult(component_value, token)
