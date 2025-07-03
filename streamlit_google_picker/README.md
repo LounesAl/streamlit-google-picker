@@ -1,11 +1,11 @@
-# streamlit-custom-component
+# streamlit-google-picker
 
 Streamlit component that allows you to do X
 
 ## Installation instructions
 
 ```sh
-pip install streamlit-custom-component
+pip install streamlit-google-picker
 ```
 
 ## Usage instructions
@@ -13,7 +13,7 @@ pip install streamlit-custom-component
 ```python
 import streamlit as st
 
-from google_picker import google_picker
+from streamlit_google_picker import google_picker
 
 value = google_picker()
 
