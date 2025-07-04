@@ -38,7 +38,7 @@ jobs:
       - name: Run tests
         run: |
           cd streamlit_google_picker
-          pytest ../tests/
+          pytest tests/
 
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v4
