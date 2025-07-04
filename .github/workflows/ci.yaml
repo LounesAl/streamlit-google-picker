@@ -10,45 +10,68 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.9"
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Install and build frontend
         run: |
-          cd streamlit_google_picker/frontend
+          cd streamlit_google_picker/streamlit_google_picker/frontend
           npm install
           npm run build
 
       - name: Install backend and test deps
         run: |
+          cd streamlit_google_picker
           pip install -U pip setuptools wheel pytest
+
       - name: Build wheel
         run: |
+          cd streamlit_google_picker
           python setup.py sdist bdist_wheel
 
       - name: Run tests
-        run: pytest tests/
+        run: |
+          cd streamlit_google_picker
+          pytest ../tests/
+
+      - name: Upload wheel as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dist
+          path: streamlit_google_picker/dist/*
 
   publish-testpypi:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist
       - name: Publish to Test PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+          repository-url: https://test.pypi.org/legacy/
 
   publish-pypi:
     needs: publish-testpypi
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Download wheel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dist
+          path: dist
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
