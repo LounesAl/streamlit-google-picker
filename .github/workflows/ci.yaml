@@ -12,7 +12,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install uv
-        run: pip install uv
+        run: |
+          pip install uv
+          uv venv
 
       - uses: actions/setup-python@v5
         with:
