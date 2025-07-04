@@ -1,4 +1,3 @@
-import io
 import pytest
 from streamlit_google_picker.uploaded_file import UploadedFile
 

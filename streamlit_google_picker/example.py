@@ -1,3 +1,11 @@
+# /// script
+# dependencies = [
+#   "python-dotenv>=1.0.1",
+#   "streamlit-oauth>=0.1.14",
+# ]
+# ///
+
+
 import streamlit as st
 from streamlit_oauth import OAuth2Component
 import os

@@ -10,8 +10,6 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "streamlit>=1.46.1",
-    "python-dotenv>=1.0.1",
-    "streamlit-oauth>=0.1.14",
 ]
 authors = [
     {name = "Lounes Allioui", email = "hello@lounesallioui.com"}
@@ -22,6 +20,10 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+oauth = [
+    "python-dotenv>=1.0.1",
+    "streamlit-oauth>=0.1.14",
+]
 dev = [
     "pytest>=8.4.1",
     "playwright>=1.53.0",
