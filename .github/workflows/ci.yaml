@@ -21,35 +21,31 @@ jobs:
 
       - name: Install and build frontend
         run: |
-          cd streamlit_google_picker/streamlit_google_picker/frontend
+          cd streamlit_google_picker/frontend
           npm install
           npm run build
 
       - name: Install backend and test deps
         run: |
-          cd streamlit_google_picker
           pip install -U pip setuptools wheel pytest
 
       - name: Build wheel
         run: |
-          cd streamlit_google_picker
           python setup.py sdist bdist_wheel
-          
+
       - name: Install your package in editable mode
         run: |
-          cd streamlit_google_picker
           pip install -e .
 
       - name: Run tests
         run: |
-          cd streamlit_google_picker
           pytest tests/
 
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v4
         with:
           name: python-dist
-          path: streamlit_google_picker/dist/*
+          path: dist/*
 
   publish-testpypi:
     needs: build-and-test

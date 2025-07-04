@@ -1,18 +1,33 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "streamlit-google-picker"
 version = "0.1.0"
-description = "Add your description here"
+description = "Streamlit component for picking files from Google Drive"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 dependencies = [
-    "python-dotenv>=1.0.1",
     "streamlit>=1.46.1",
+    "python-dotenv>=1.0.1",
     "streamlit-oauth>=0.1.14",
 ]
+authors = [
+    {name = "Lounes Allioui", email = "hello@lounesallioui.com"}
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent"
+]
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
-    "playwright>=1.53.0",
     "pytest>=8.4.1",
+    "playwright>=1.53.0",
     "setuptools>=80.9.0",
 ]
+
+[tool.setuptools]
+include-package-data = true
+packages = ["streamlit_google_picker"]
