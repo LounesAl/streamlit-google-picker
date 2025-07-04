@@ -34,6 +34,11 @@ jobs:
         run: |
           cd streamlit_google_picker
           python setup.py sdist bdist_wheel
+          
+      - name: Install your package in editable mode
+        run: |
+          cd streamlit_google_picker
+          pip install -e .
 
       - name: Run tests
         run: |
