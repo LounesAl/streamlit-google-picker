@@ -13,6 +13,7 @@ import base64
 import json
 
 from streamlit_google_picker import google_picker
+from streamlit_google_picker.uploaded_file import get_uploaded_file_cache
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -128,6 +129,7 @@ with st_normal():
         if False : 
             with open(f.name, "wb") as out_file:
                 out_file.write(data)
+    st.write("Files in memory : ", len(get_uploaded_file_cache()))
         
         
     uploaded_files = st.file_uploader(

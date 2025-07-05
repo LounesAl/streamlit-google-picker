@@ -3,11 +3,11 @@ from typing import Sequence, Optional, Union
 
 import streamlit.components.v1 as components
 
-from .uploaded_file import GooglePickerResult
+from .uploaded_file import GooglePickerResult, prune_uploaded_file_cache
 
 _RELEASE = True
 
-if not _RELEASE:
+if not _RELEASE: # Does not work with google picker api (conflict between streamlit and conponent ports 8501, 3001)
     _component_func = components.declare_component(
         "streamlit_google_picker",
         url="http://localhost:3001",
@@ -67,7 +67,8 @@ def google_picker(
         key=key,
         default=None,
     )
-    if not component_value:
-        return []
-    # For multi-select or single, always return GooglePickerResult
-    return GooglePickerResult(component_value, token)
+
+    result = GooglePickerResult(component_value, token, use_cache=True)
+    current_file_ids = [f.id for f in result]
+    prune_uploaded_file_cache(current_file_ids)
+    return result
