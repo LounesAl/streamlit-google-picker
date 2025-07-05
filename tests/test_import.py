@@ -21,7 +21,7 @@ def test_uploaded_file_attrs(dummy_metadata, dummy_token):
     assert f.id == "abc123"
     assert f.type == "text/plain"
     assert f.url.startswith("https://")
-    assert f.size_bytes == 4
+    assert f.size == 4
     assert f.token == dummy_token
 
 def test_uploaded_file_is_filelike(dummy_metadata, dummy_token):
