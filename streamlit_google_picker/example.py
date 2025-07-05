@@ -24,10 +24,34 @@ API_KEY = os.environ.get("GOOGLE_API_KEY")
 APP_ID = os.environ.get("GOOGLE_PROJECT_NUMBER")
 
 # Endpoints Google OAuth2
+SECRETS_FILE = "secrets.json"
 AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 REVOKE_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 SCOPES = "openid email profile https://www.googleapis.com/auth/drive.file"
+
+def secrets_file_exists():
+    """Returns True if secrets.json exists and contains 'auth' and 'token' keys."""
+    if not os.path.exists(SECRETS_FILE):
+        return False
+    try:
+        with open(SECRETS_FILE, "r") as f:
+            secrets = json.load(f)
+        return secrets is not None and "auth" in secrets and "token" in secrets
+    except Exception:
+        return False
+
+def read_auth_from_secrets():
+    """Reads auth and token from secrets.json."""
+    with open(SECRETS_FILE, "r") as f:
+        secrets = json.load(f)
+    return secrets["auth"], secrets["token"]
+
+def save_auth_to_secrets(auth, token):
+    """Saves auth and token to secrets.json."""
+    secrets = {"auth": auth, "token": token}
+    with open(SECRETS_FILE, "w") as f:
+        json.dump(secrets, f)
 
 st.set_page_config(
     page_title="Google Picker",
@@ -48,8 +72,11 @@ with st_normal():
         payload = id_token.split(".")[1]
         payload += "=" * (-len(payload) % 4)
         return json.loads(base64.b64decode(payload))["email"]
-
-    if "auth" not in st.session_state or "token" not in st.session_state:
+    
+    if secrets_file_exists():
+        st.session_state["auth"], st.session_state["token"] = read_auth_from_secrets()
+        
+    elif "auth" not in st.session_state or "token" not in st.session_state:
         # OAuth2 flow (login Google)
         oauth2 = OAuth2Component(
             CLIENT_ID,
@@ -74,6 +101,7 @@ with st_normal():
             id_token = result["token"]["id_token"]
             st.session_state["auth"] = parse_email_from_id_token(id_token)
             st.session_state["token"] = result["token"]
+            save_auth_to_secrets(st.session_state["auth"], result["token"])
             st.rerun()
         st.stop()
 
@@ -94,13 +122,12 @@ with st_normal():
         key="google_picker"
     )
     for f in grive_uploaded_files:
-        st.write(f"Filename: {f.name}, Size: {f.size_bytes}")
+        st.write(f"Filename: {f.name}, Size: {f.size}")
         data = f.read()
-        st.write(len(data))
         # Save to local disk
-        with open(f.name, "wb") as out_file:
-            out_file.write(data)
-        st.success(f"Saved file: {f.name}")
+        if False : 
+            with open(f.name, "wb") as out_file:
+                out_file.write(data)
         
         
     uploaded_files = st.file_uploader(
@@ -110,8 +137,13 @@ with st_normal():
         width='stretch'
     )
     if uploaded_files:
-        for uploaded_file in uploaded_files:
-            st.write("filename:", uploaded_file.name)
+        for f in uploaded_files:
+            st.write(f"Filename: {f.name}, Size: {f.size}")
+            data = f.read()
+            # Save to local disk
+            if False : 
+                with open(f.name, "wb") as out_file:
+                    out_file.write(data)
 
     # Option logout
     if st.button("Logout"):
