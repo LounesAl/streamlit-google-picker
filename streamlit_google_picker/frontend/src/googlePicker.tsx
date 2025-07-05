@@ -4,7 +4,7 @@ import {
   withStreamlitConnection,
   ComponentProps,
 } from "streamlit-component-lib"
-import styles from "./GooglePicker.module.css"
+import styles from "./googlePicker.module.css"
 import {DriveIcon, FileIcon, XIcon} from "./icons"
 import { EXT_TO_MIME } from "./googlePickerHelpers"
 
