@@ -5,7 +5,7 @@ import {
   ComponentProps,
 } from "streamlit-component-lib"
 import styles from "./GooglePicker.module.css"
-import DriveIcon from "./driveIcon"
+import {DriveIcon, FileIcon, XIcon} from "./icons"
 import { EXT_TO_MIME } from "./googlePickerHelpers"
 
 declare global {
@@ -13,6 +13,14 @@ declare global {
     gapi: any
     google: any
   }
+}
+
+type GoogleDriveFile = {
+  id: string
+  name: string
+  mimeType: string
+  sizeBytes: number
+  [key: string]: any // extra fields (icon, size, etc)
 }
 
 function GooglePickerComponent({
@@ -34,6 +42,7 @@ function GooglePickerComponent({
 
   const [pickerApiLoaded, setPickerApiLoaded] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [pickedFiles, setPickedFiles] = useState<GoogleDriveFile[]>([])
 
   useEffect(() => {
     if (!window.gapi) {
@@ -50,9 +59,15 @@ function GooglePickerComponent({
   }, [])
 
   useEffect(() => {
-    Streamlit.setFrameHeight(pickerOpen ? 600 : 80)
-  }, [pickerOpen])
+    Streamlit.setFrameHeight(pickerOpen ? 600 : 80 + 50 * pickedFiles.length)
+  }, [pickerOpen, pickedFiles.length])
 
+  // On every list change: send full list to backend + debug print
+  useEffect(() => {
+    Streamlit.setComponentValue(pickedFiles)
+  }, [pickedFiles])
+
+  // === HANDLER: Show Google Picker ===
   const showPicker = useCallback(() => {
     setPickerOpen(true)
     if (!window.google?.picker) {
@@ -99,9 +114,18 @@ function GooglePickerComponent({
           setPickerOpen(false)
         }
         if (data.action === window.google.picker.Action.PICKED) {
-          Streamlit.setComponentValue(
-            accept_multiple_files ? data.docs : data.docs?.[0] || null
-          )
+          let newFiles: GoogleDriveFile[] = data.docs || []
+          // If not accept_multiple_files, keep only 1
+          if (!accept_multiple_files && newFiles.length > 0) {
+            setPickedFiles([newFiles[0]])
+          } else {
+            // Merge: add any not-already-present files by id
+            setPickedFiles(prev => {
+              const prevIds = new Set(prev.map(f => f.id))
+              const uniqueNew = newFiles.filter(f => !prevIds.has(f.id))
+              return [...prev, ...uniqueNew]
+            })
+          }
           setPickerOpen(false)
         }
       })
@@ -117,33 +141,78 @@ function GooglePickerComponent({
     }
 
     pickerBuilder.build().setVisible(true)
-  }, [token, apiKey, appId, accept_multiple_files, type, allow_folders, view_ids, nav_hidden])
+  }, [
+    token, apiKey, appId,
+    accept_multiple_files, type, allow_folders, view_ids, nav_hidden
+  ])
 
+  // === HANDLER: Remove file from list ===
+  const handleRemoveFile = (id: string) => {
+    setPickedFiles(prev => prev.filter(f => f.id !== id))
+  }
+
+  // === RENDER UI ===
   return (
-    <section
-      role="presentation"
-      tabIndex={0}
-      aria-label="Pick from Google Drive"
-      className={styles.uploader}
-      data-testid="stFileUploaderDropzone"
-    >
+    <>
+      <section
+        role="presentation"
+        tabIndex={0}
+        aria-label="Pick from Google Drive"
+        className={styles.uploader}
+        data-testid="stFileUploaderDropzone"
+      >
       <div className={styles.info}>
-        <DriveIcon />
+          <DriveIcon />
         <div className={styles.texts}>
           <span className={styles.title}>Pick files from Google Drive</span>
           <small className={styles.subtitle}>Limit 200MB per file</small>
+          </div>
         </div>
-      </div>
-      <button
-        className={styles.button}
-        onClick={showPicker}
-        disabled={disabled || !pickerApiLoaded || !token}
-        aria-label="Pick file from Drive"
-        data-testid="stBaseButton-secondary"
-      >
-        Browse Drive
-      </button>
-    </section>
+        <button
+          className={styles.button}
+          onClick={showPicker}
+          disabled={disabled || !pickerApiLoaded || !token}
+          aria-label="Pick file from Drive"
+          data-testid="stBaseButton-secondary"
+        >
+          Browse Drive
+        </button>
+      </section>
+
+      {/* BELOW the gray box: File list, same as Streamlit */}
+      {pickedFiles.length > 0 && (
+        <ul className={styles.fileList}>
+          {pickedFiles.map((file) => (
+            <li key={file.id}>
+              <div className={styles.fileRow} data-testid="stFileUploaderFile">
+                {/* Everything left of the X */}
+                <div className={styles.fileInfo}>
+                  <div className={styles.fileIcon}>
+                    <FileIcon />
+                  </div>
+                  <div className={styles.fileMain}>
+                    <div className={styles.fileName} title={file.name}>{file.name}</div>
+                    <small className={styles.fileSize}>
+                      {file.sizeBytes ? `${(file.sizeBytes / 1024).toFixed(1)}KB` : ""}
+                    </small>
+                  </div>
+                </div>
+                {/* The X at the far right */}
+                <div className={styles.removeBtnContainer} data-testid="stFileUploaderDeleteBtn">
+                  <button
+                    className={styles.removeBtn}
+                    aria-label="Remove file"
+                    onClick={() => handleRemoveFile(file.id)}
+                  >
+                    <XIcon />
+                  </button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
   )
 }
 

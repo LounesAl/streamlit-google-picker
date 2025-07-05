@@ -149,4 +149,5 @@ with st_normal():
     if st.button("Logout"):
         del st.session_state["auth"]
         del st.session_state["token"]
+        os.remove(SECRETS_FILE)
         st.rerun()

@@ -79,3 +79,80 @@
   border-color: rgb(255, 75, 75);
   color: rgb(255, 75, 75);
 }
+
+.fileList {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0 0;
+  width: 100%;
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 6px;
+  padding: 12px 16px 0px;
+  font-family: "Source Sans", sans-serif;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  flex: 1;              /* This pushes the X all the way to the right */
+  min-width: 0;         /* So name/text can truncate nicely */
+}
+
+.fileIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  margin-right: 8px;
+}
+
+.fileMain {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 16px;
+  color: #31333F;
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* don't use flex: 1 here! */
+}
+
+.fileSize {
+  font-size: 14px;
+  color: rgba(49, 51, 63, 0.6);
+  letter-spacing: 0.02em;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.removeBtnContainer {
+  margin-left: 0px;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  color: #222;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.removeBtn:hover {
+  color: #ff4b4b;
+}
