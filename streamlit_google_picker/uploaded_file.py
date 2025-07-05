@@ -48,12 +48,8 @@ class UploadedFile(io.BytesIO):
         self.write(self._bytes)
         self.seek(0)
 
-    @property
-    def size_bytes(self):
-        return self.size
-
     def __repr__(self):
-        return f"<UploadedFile name={self.name} id={self.id} type={self.type} size={self.size_bytes}>"
+        return f"<UploadedFile name={self.name} id={self.id} type={self.type} size={self.size}>"
 
 def list_files_in_folder(folder_id: str, token: str) -> List[dict]:
     """Recursively list all files (not folders) in a folder, including in subfolders."""
