@@ -38,7 +38,7 @@ def secrets_file_exists():
     try:
         with open(SECRETS_FILE, "r") as f:
             secrets = json.load(f)
-        return secrets is not None and "auth" in secrets and "token" in secrets
+        return secrets is not None and "token" in secrets
     except Exception:
         return False
 
@@ -46,13 +46,23 @@ def read_auth_from_secrets():
     """Reads auth and token from secrets.json."""
     with open(SECRETS_FILE, "r") as f:
         secrets = json.load(f)
-    return secrets["auth"], secrets["token"]
+    return secrets["token"]
 
-def save_auth_to_secrets(auth, token):
+def save_auth_to_secrets(token):
     """Saves auth and token to secrets.json."""
-    secrets = {"auth": auth, "token": token}
+    secrets = {"token": token}
     with open(SECRETS_FILE, "w") as f:
         json.dump(secrets, f)
+        
+def get_oauth():
+    return OAuth2Component(
+            CLIENT_ID,
+            CLIENT_SECRET,
+            AUTHORIZE_ENDPOINT,
+            TOKEN_ENDPOINT,
+            TOKEN_ENDPOINT,
+            REVOKE_ENDPOINT,
+        )
 
 st.set_page_config(
     page_title="Google Picker",
@@ -75,19 +85,16 @@ with st_normal():
         return json.loads(base64.b64decode(payload))["email"]
     
     if secrets_file_exists():
-        st.session_state["auth"], st.session_state["token"] = read_auth_from_secrets()
+        st.session_state["token"] = read_auth_from_secrets()
+        new_token = get_oauth().refresh_token(st.session_state["token"])
+        new_token.setdefault("refresh_token", st.session_state["token"]["refresh_token"])
+        st.session_state["token"] = new_token
+        save_auth_to_secrets(new_token)
         
     elif "auth" not in st.session_state or "token" not in st.session_state:
         # OAuth2 flow (login Google)
-        oauth2 = OAuth2Component(
-            CLIENT_ID,
-            CLIENT_SECRET,
-            AUTHORIZE_ENDPOINT,
-            TOKEN_ENDPOINT,
-            TOKEN_ENDPOINT,
-            REVOKE_ENDPOINT,
-        )
-        result = oauth2.authorize_button(
+        
+        result = get_oauth().authorize_button(
             name="Continue with Google",
             icon="https://www.google.com.tw/favicon.ico",
             redirect_uri="http://localhost:8501",
@@ -99,10 +106,8 @@ with st_normal():
         )
         if result:
             # Stockage du token et email dans la session
-            id_token = result["token"]["id_token"]
-            st.session_state["auth"] = parse_email_from_id_token(id_token)
             st.session_state["token"] = result["token"]
-            save_auth_to_secrets(st.session_state["auth"], result["token"])
+            save_auth_to_secrets(result["token"])
             st.rerun()
         st.stop()
 
@@ -117,9 +122,9 @@ with st_normal():
         appId=APP_ID,
         accept_multiple_files=True,                   # Enable multi-select (like st.file_uploader)
         type=["pdf", "png"],                          # Restrict to pdf, png
-        allow_folders=True,                           # Allow folder selection
-        view_ids=None, # Tabs: Docs, Spreadsheets, Folders (custom views)
-        nav_hidden=False,                             # Show navigation pane
+        allow_folders=True,                          # Allow folder selection
+        view_ids=None,            # Tabs: DOCS, Spreadsheets, FOLDERS (custom views)
+        nav_hidden=True,                             # Show navigation pane
         key="google_picker"
     )
     for f in grive_uploaded_files:
@@ -149,7 +154,6 @@ with st_normal():
 
     # Option logout
     if st.button("Logout"):
-        del st.session_state["auth"]
         del st.session_state["token"]
         os.remove(SECRETS_FILE)
         st.rerun()
