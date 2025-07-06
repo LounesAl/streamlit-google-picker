@@ -5,7 +5,7 @@ import {
   ComponentProps,
 } from "streamlit-component-lib"
 import styles from "./googlePicker.module.css"
-import {DriveIcon, FileIcon, XIcon} from "./icons"
+import {DriveIcon, FileIcon, XIcon, LeftArrowIcon, RightArrowIcon} from "./icons"
 import { EXT_TO_MIME } from "./googlePickerHelpers"
 
 declare global {
@@ -43,6 +43,19 @@ function GooglePickerComponent({
   const [pickerApiLoaded, setPickerApiLoaded] = useState(false)
   const [pickerOpen, setPickerOpen] = useState(false)
   const [pickedFiles, setPickedFiles] = useState<GoogleDriveFile[]>([])
+
+  const PAGE_SIZE = 3;
+  const [page, setPage] = useState(0);
+
+  const numPages = Math.ceil(pickedFiles.length / PAGE_SIZE);
+  const pagedFiles = pickedFiles.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  // Reset to first page if pickedFiles shrinks (e.g. files removed)
+  useEffect(() => {
+    if (page > 0 && page >= numPages) {
+      setPage(numPages - 1);
+    }
+  }, [pickedFiles.length, numPages]);
 
   useEffect(() => {
     if (!window.gapi) {
@@ -181,36 +194,61 @@ function GooglePickerComponent({
 
       {/* BELOW the gray box: File list, same as Streamlit */}
       {pickedFiles.length > 0 && (
-        <ul className={styles.fileList}>
-          {pickedFiles.map((file) => (
-            <li key={file.id}>
-              <div className={styles.fileRow} data-testid="stFileUploaderFile">
-                {/* Everything left of the X */}
-                <div className={styles.fileInfo}>
-                  <div className={styles.fileIcon}>
-                    <FileIcon />
+        <>
+          <ul className={styles.fileList}>
+            {pagedFiles.map((file) => (
+              <li key={file.id}>
+                <div className={styles.fileRow} data-testid="stFileUploaderFile">
+                  <div className={styles.fileInfo}>
+                    <div className={styles.fileIcon}>
+                      <FileIcon />
+                    </div>
+                    <div className={styles.fileMain}>
+                      <div className={styles.fileName} title={file.name}>{file.name}</div>
+                      <small className={styles.fileSize}>
+                        {file.sizeBytes ? `${(file.sizeBytes / 1024).toFixed(1)}KB` : ""}
+                      </small>
+                    </div>
                   </div>
-                  <div className={styles.fileMain}>
-                    <div className={styles.fileName} title={file.name}>{file.name}</div>
-                    <small className={styles.fileSize}>
-                      {file.sizeBytes ? `${(file.sizeBytes / 1024).toFixed(1)}KB` : ""}
-                    </small>
+                  <div className={styles.removeBtnContainer} data-testid="stFileUploaderDeleteBtn">
+                    <button
+                      className={styles.removeBtn}
+                      aria-label="Remove file"
+                      onClick={() => handleRemoveFile(file.id)}
+                    >
+                      <XIcon />
+                    </button>
                   </div>
                 </div>
-                {/* The X at the far right */}
-                <div className={styles.removeBtnContainer} data-testid="stFileUploaderDeleteBtn">
-                  <button
-                    className={styles.removeBtn}
-                    aria-label="Remove file"
-                    onClick={() => handleRemoveFile(file.id)}
-                  >
-                    <XIcon />
-                  </button>
-                </div>
+              </li>
+            ))}
+          </ul>
+          {numPages > 1 && (
+            <div className={styles.paginationRow}>
+              <span className={styles.pageInfo}>
+                Showing page {page + 1} of {numPages}
+              </span>
+              <div className={styles.pagination}>
+                <button
+                  className={styles.pageBtn}
+                  disabled={page === 0}
+                  onClick={() => setPage(page - 1)}
+                  aria-label="Previous page"
+                >
+                  <LeftArrowIcon />
+                </button>
+                <button
+                  className={styles.pageBtn}
+                  disabled={page >= numPages - 1}
+                  onClick={() => setPage(page + 1)}
+                  aria-label="Next page"
+                >
+                  <RightArrowIcon />
+                </button>
               </div>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+        </>
       )}
     </>
   )

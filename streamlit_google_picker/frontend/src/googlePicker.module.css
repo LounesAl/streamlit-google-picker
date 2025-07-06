@@ -156,3 +156,48 @@
 .removeBtn:hover {
   color: #ff4b4b;
 }
+
+.paginationRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;  /* key! left/right split */
+  width: 100%;
+  margin-top: 8px;
+}
+
+.pageInfo {
+  color: rgba(49, 51, 63, 0.6);
+  font-size: 14px;
+  margin-left: 8px; /* optional for alignment */
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.pageBtn {
+  background: none;
+  border: none;
+  color: rgba(49, 51, 63, 0.2);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.pageBtn:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+.pageBtn:not(:disabled):hover svg path {
+  fill: #ff4b4b;
+}
+
+.pageBtn:focus {
+  outline: none;
+  box-shadow: none;
+}

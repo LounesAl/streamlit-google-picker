@@ -1218,7 +1218,7 @@ wheels = [
 
 [[package]]
 name = "streamlit-google-picker"
-version = "0.2.0"
+version = "0.2.3"
 source = { editable = "." }
 dependencies = [
     { name = "streamlit" },
@@ -1241,7 +1241,7 @@ requires-dist = [
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.1" },
     { name = "python-dotenv", marker = "extra == 'oauth'", specifier = ">=1.0.1" },
     { name = "setuptools", marker = "extra == 'dev'", specifier = ">=80.9.0" },
-    { name = "streamlit", specifier = ">=1.46.1" },
+    { name = "streamlit", specifier = ">=1.45.0" },
     { name = "streamlit-oauth", marker = "extra == 'oauth'", specifier = ">=0.1.14" },
 ]
 
