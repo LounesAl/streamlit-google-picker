@@ -129,3 +129,17 @@ class GooglePickerResult:
 
     def __repr__(self):
         return f"<GooglePickerResult files={self.files!r}>"
+
+    def __add__(self, other):
+        if isinstance(other, list):
+            return self.files + other
+        elif isinstance(other, GooglePickerResult):
+            return self.files + other.files
+        else:
+            return NotImplemented
+
+    def __radd__(self, other):
+        if isinstance(other, list):
+            return other + self.files
+        else:
+            return NotImplemented
