@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "streamlit-google-picker"
-version = "0.2.1"
+version = "0.2.2"
 description = "Streamlit component for picking files from Google Drive"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "streamlit>=1.46.1",
+    "streamlit>=1.45.0",
 ]
 authors = [
     {name = "Lounes Allioui", email = "hello@lounesallioui.com"}
