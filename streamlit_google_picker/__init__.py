@@ -43,6 +43,7 @@ def google_picker(
         type (str or Sequence[str]): Allowed file types/extensions or MIME types.
         allow_folders (bool): Allow selecting folders (default: False).
         view_ids (Sequence[str]): Google Picker View IDs, e.g., ["DOCS", "IMAGES"].
+            https://developers.google.com/workspace/drive/picker/reference/picker.viewid
         nav_hidden (bool): Hide the navigation pane in picker (default: False).
         key (str): Streamlit unique key for the component.
 
