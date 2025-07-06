@@ -112,9 +112,11 @@ def flatten_picker_result(items, token, use_cache=True):
 
 class GooglePickerResult:
     def __init__(self, picker_result: Union[dict, list], token: str, use_cache=True):
-        if isinstance(picker_result, dict):
-            picker_result = [picker_result]
-        self.files = flatten_picker_result(picker_result, token, use_cache=True)
+        self.files = []
+        if picker_result:
+            if isinstance(picker_result, dict):
+                picker_result = [picker_result]
+            self.files = flatten_picker_result(picker_result, token, use_cache=use_cache)
 
     def __iter__(self) -> Iterator[UploadedFile]:
         return iter(self.files)
