@@ -1218,7 +1218,7 @@ wheels = [
 
 [[package]]
 name = "streamlit-google-picker"
-version = "0.2.5"
+version = "0.2.6"
 source = { editable = "." }
 dependencies = [
     { name = "streamlit" },
