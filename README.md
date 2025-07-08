@@ -48,7 +48,6 @@ You need a Google Cloud project with proper OAuth2 and API setup:
 GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_API_KEY=your-api-key
-GOOGLE_PROJECT_NUMBER=your-project-number
 ```
 
 ---
@@ -62,8 +61,9 @@ import streamlit as st
 from streamlit_google_picker import google_picker
 
 token = st.session_state["token"]["access_token"]  # From your OAuth2 flow
+CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 API_KEY = os.environ["GOOGLE_API_KEY"]
-APP_ID = os.environ["GOOGLE_PROJECT_NUMBER"]
+APP_ID = CLIENT_ID.split("-")[0]
 
 uploaded_files = google_picker(
     label="Pick files from Google Drive",

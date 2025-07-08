@@ -22,7 +22,7 @@ load_dotenv()
 CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 API_KEY = os.environ.get("GOOGLE_API_KEY")
-APP_ID = os.environ.get("GOOGLE_PROJECT_NUMBER")
+APP_ID = CLIENT_ID.split("-")[0]
 
 # Endpoints Google OAuth2
 SECRETS_FILE = "secrets.json"
