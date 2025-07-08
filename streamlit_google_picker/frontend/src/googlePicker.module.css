@@ -12,6 +12,7 @@
   margin: 0;
   font-family: "Source Sans", sans-serif;
   font-size: 14px;
+  outline: none;
 }
 
 .info {
@@ -78,6 +79,18 @@
 .button:focus:not(:disabled) {
   border-color: rgb(255, 75, 75);
   color: rgb(255, 75, 75);
+  outline: none;
+}
+
+.button:active:not(:disabled) {
+  background: rgb(255, 75, 75);
+  color: #fff;
+  border: none;
+}
+
+.button:focus:not(:active) {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,75,75,0.3);
 }
 
 .fileList {
@@ -150,11 +163,24 @@
   line-height: 1;
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s;
+  border-radius: 6px;
+  transition: color 0.2s, box-shadow 0.2s;
+  outline: none;
 }
 
 .removeBtn:hover {
   color: #ff4b4b;
+}
+
+.removeBtn:focus:not(:active) {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,75,75,0.3);
+  border-radius: 6px;
+}
+
+.removeBtn:focus,
+.removeBtn:active {
+  outline: none !important;
 }
 
 .paginationRow {
