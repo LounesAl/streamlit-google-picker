@@ -72,7 +72,7 @@ function GooglePickerComponent({
   }, [])
 
   useEffect(() => {
-    Streamlit.setFrameHeight(pickerOpen ? 600 : 80 + 50 * pickedFiles.length)
+    Streamlit.setFrameHeight(pickerOpen ? 600 : 80 + 50 * pagedFiles.length)
   }, [pickerOpen, pickedFiles.length])
 
   // On every list change: send full list to backend + debug print
