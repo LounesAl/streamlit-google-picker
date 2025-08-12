@@ -76,7 +76,7 @@ def st_normal():
     return col
 
 with st_normal():
-    st.title("Streamlit Google Picker + OAuth2")
+    st.title("Streamlit Google Picker")
 
     if "name" in st.session_state and st.session_state["name"]:
         st.write("Hi " + st.session_state["name"])
