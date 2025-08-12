@@ -18,7 +18,7 @@ This component lets you embed the Google Drive file picker directly in your Stre
 ## 📸 Demo
 
 <p align="center">
-  <img src="./file_loader.png" width="500"/>
+  <img src="./assets/screen.png" width="800"/>
 </p>
 
 ---
