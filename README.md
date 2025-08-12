@@ -8,11 +8,10 @@ This component lets you embed the Google Drive file picker directly in your Stre
 
 ## 🚀 Features
 
-* **Pick files or folders from Google Drive**
-* **Multi-select support** (pick multiple files/folders at once)
-* **Filter by file type or MIME type** (e.g. PDF, images, etc.)
-* **Folder navigation just like Drive** (In progress)
-* **Native Streamlit feel, like `st.file_uploader`**
+- **Pick files or folders from Google Drive**
+- **Multi-select support** (pick multiple files) (pick folder in progress)
+- **Filter by file type or MIME type** (e.g. PDF, images, etc.)
+- **Native Streamlit feel, like `st.file_uploader`**
 
 ---
 
@@ -30,17 +29,17 @@ This component lets you embed the Google Drive file picker directly in your Stre
 pip install streamlit-google-picker
 ```
 
-*For latest dev, use `pip install git+https://github.com/LounesAl/streamlit-google-picker`*
+_For latest dev, use `pip install git+https://github.com/LounesAl/streamlit-google-picker`_
 
 ---
 
 ## ⚙️ Requirements
 
-You need a Google Cloud project with proper OAuth2 and API setup:
+You will need a Google Cloud project with proper OAuth 2.0 and API setup in the [google cloud console](https://console.cloud.google.com/apis/credentials):
 
-1. **Create an OAuth2 Client ID** (Web application)
+1. **Create an OAuth2 Client ID** (Web application ! **Important**)
 2. **Set Redirect URI** (e.g. `http://localhost:8501` for local)
-3. **Enable** both **Google Drive API** and **Google Picker API**
+3. **Create an API key** then **Enable** both **Google Drive API** and **Google Picker API**
 
 **Set these in your environment:**
 
@@ -52,7 +51,7 @@ GOOGLE_API_KEY=your-api-key
 
 ---
 
-## ✨ Usage
+## ✨ Basic usage
 
 **After the user is authenticated (OAuth2, see examples), use the picker:**
 
@@ -86,7 +85,7 @@ if uploaded_files:
         st.write(f"Bytes: {len(data)}")
 ```
 
-**Folder selection:**
+**Folder selection: (In Progress)**
 If the user selects a folder, all files inside (recursively) are returned as `UploadedFile` objects.
 
 **You can also use it with a single file (returns a single object or None):**
@@ -102,8 +101,8 @@ if uploaded_file:
 
 ## 📥 Return Format
 
-* If `accept_multiple_files=True`, returns a **list** of `UploadedFile` objects (like Streamlit’s).
-* If `accept_multiple_files=False`, returns a single `UploadedFile` or `None`.
+- If `accept_multiple_files=True`, returns a **list** of `UploadedFile` objects (like Streamlit’s).
+- If `accept_multiple_files=False`, returns a single `UploadedFile` or `None`.
 
 Each `UploadedFile` behaves like a Python file object (subclass of `io.BytesIO`):
 
@@ -123,34 +122,29 @@ uploaded_file.read()     # Reads bytes (downloads on demand)
 A typical flow:
 
 1. User authenticates via Google OAuth2 (e.g. with [streamlit-oauth](https://github.com/streamlit/streamlit-oauth))
-2. Store `access_token` in `st.session_state`
+2. Store `access_token` in `st.session_state` and DB + auto refresh token (Here we use secrects.json for simulation)
 3. Pass token to `google_picker()`
-4. Get uploaded files as file-like objects
+4. Get the selected files as `UploadedFile` objects.
 
-See [`example.py`](./streamlit_google_picker/streamlit_google_picker/example.py) for a full sample.
+See [`example.py`](./streamlit_google_picker/example.py) for a full sample.
 
 ---
 
 ## 🧑‍💻 Development
 
-* Clone this repo
-* Install backend (Python) and frontend (React) requirements
-* Run `npm install && npm start` in `frontend/` for hot-reload
-* Develop Streamlit component as usual
+- Clone this repo
+- Install backend (Python) and frontend (React) requirements
+- Run `npm install && npm start` in `frontend/` for hot-reload
+- Develop Streamlit component as usual
 
 ---
 
-## 📜 License
+## 💡 Credits and Docs
 
-MIT
-
----
-
-## 💡 Credits
-
-* [Streamlit Components](https://docs.streamlit.io/library/components)
-* [Google Picker API Docs](https://developers.google.com/picker/docs)
-* [Google Drive API Docs](https://developers.google.com/drive/api)
+- [Streamlit Components](https://docs.streamlit.io/library/components)
+- [Google Picker API Docs](https://developers.google.com/picker/docs)
+- [Google Drive API Docs](https://developers.google.com/drive/api)
+- [streamlit-oauth](https://github.com/streamlit/streamlit-oauth)
 
 ---
 
