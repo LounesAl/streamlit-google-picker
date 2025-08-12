@@ -76,13 +76,17 @@ def st_normal():
     return col
 
 with st_normal():
-    st.title("Google Picker OAuth2 Example")
+    st.title("Streamlit Google Picker + OAuth2")
 
-    def parse_email_from_id_token(id_token):
+    if "name" in st.session_state and st.session_state["name"]:
+        st.write("Hi " + st.session_state["name"])
+
+    def parse_name_from_id_token(id_token):
         """Décode le JWT pour récupérer l'email utilisateur."""
         payload = id_token.split(".")[1]
         payload += "=" * (-len(payload) % 4)
-        return json.loads(base64.b64decode(payload))["email"]
+        print(json.loads(base64.b64decode(payload)))
+        return json.loads(base64.b64decode(payload))["given_name"]
     
     if secrets_file_exists():
         st.session_state["token"] = read_auth_from_secrets()
@@ -93,7 +97,6 @@ with st_normal():
         
     elif "auth" not in st.session_state or "token" not in st.session_state:
         # OAuth2 flow (login Google)
-        
         result = get_oauth().authorize_button(
             name="Continue with Google",
             icon="https://www.google.com.tw/favicon.ico",
@@ -105,26 +108,27 @@ with st_normal():
             pkce='S256',
         )
         if result:
-            # Stockage du token et email dans la session
+            # Store token and email in the session
             st.session_state["token"] = result["token"]
+            st.session_state["name"] = parse_name_from_id_token(result["token"]["id_token"])
             save_auth_to_secrets(result["token"])
             st.rerun()
         st.stop()
 
-    # ==== Utilisateur authentifié ====
-    token = st.session_state["token"]["access_token"]
+    # ==== Authenticated user ====
+    access_token = st.session_state["token"]["access_token"]
 
     # ==== Google Picker Component ====
     grive_uploaded_files = google_picker(
         label="Pick files from Google Drive",
-        token=token,
+        token=access_token,
         apiKey=API_KEY,
         appId=APP_ID,
-        accept_multiple_files=True,                   # Enable multi-select (like st.file_uploader)
-        type=["pdf", "png"],                          # Restrict to pdf, png
-        allow_folders=True,                          # Allow folder selection
-        view_ids=None,            # Tabs: DOCS, Spreadsheets, FOLDERS (custom views)
-        nav_hidden=True,                             # Show navigation pane
+        accept_multiple_files=True,                     # Enable multi-select (like st.file_uploader)
+        type=["pdf", "png"],                            # Restrict to pdf, png
+        allow_folders=True,                             # Allow folder selection
+        view_ids=None,                                  # Tabs: DOCS, Spreadsheets, FOLDERS (custom views)
+        nav_hidden=True,                                # Show navigation pane
         key="google_picker"
     )
     for f in grive_uploaded_files:
@@ -155,5 +159,6 @@ with st_normal():
     # Option logout
     if st.button("Logout"):
         del st.session_state["token"]
+        del st.session_state["name"]
         os.remove(SECRETS_FILE)
         st.rerun()
