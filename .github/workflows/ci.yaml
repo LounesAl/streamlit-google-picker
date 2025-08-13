@@ -2,8 +2,10 @@ name: CI & Publish
 
 on:
   push:
-    tags:
-      - "v*"
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -31,16 +33,13 @@ jobs:
           npm run build
 
       - name: Install Python dependencies with uv
-        run: |
-          uv pip install -e ".[dev]"
+        run: uv pip install -e ".[dev]"
 
       - name: Build wheel and sdist
-        run: |
-          uv build
+        run: uv build
 
       - name: Run tests
-        run: |
-          uv run pytest tests/
+        run: uv run pytest tests/
 
       - name: Upload wheel as artifact
         uses: actions/upload-artifact@v4
@@ -49,12 +48,12 @@ jobs:
           path: dist/*
 
   publish-testpypi:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download wheel artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: python-dist
           path: dist
@@ -63,14 +62,15 @@ jobs:
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
+          skip-existing: true
 
   publish-pypi:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     needs: publish-testpypi
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download wheel artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: python-dist
           path: dist
@@ -78,3 +78,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
