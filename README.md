@@ -1,4 +1,4 @@
-# streamlit-google-picker
+# Streamlit Google Picker
 
 **A Streamlit component to select files and folders from Google Drive using the official Google Picker.**
 
