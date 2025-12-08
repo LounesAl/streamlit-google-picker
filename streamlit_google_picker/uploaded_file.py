@@ -25,7 +25,7 @@ class UploadedFile(io.BytesIO):
         self.id = metadata.get("id")
         self.type = metadata.get("mimeType")
         self.url = metadata.get("url")
-        self.size = metadata.get("sizeBytes")
+        self.size = metadata.get("size")
         self._bytes: Optional[bytes] = None
         self.use_cache = use_cache
         super().__init__()
@@ -79,7 +79,7 @@ def list_files_in_folder(folder_id: str, token: str) -> List[dict]:
     headers = {"Authorization": f"Bearer {token}"}
     base_url = "https://www.googleapis.com/drive/v3/files"
     params_base = {
-        "fields": "files(id, name, mimeType, size, parents, webViewLink, iconLink, sizeBytes)",
+        "fields": "files(id, name, mimeType, size, parents, webViewLink, iconLink)",
         "pageSize": 1000,
         "supportsAllDrives": True,
         "includeItemsFromAllDrives": True,
